@@ -1,0 +1,13 @@
+<?xml version='1.0'?>
+<manifest xmlns:android='http://schemas.android.com/apk/res/android' package='de.nsg.app'>
+	<uses-permission android:name='android.permission.ACCESS_NETWORK_STATE'/>
+	<uses-permission android:name='android.permission.INTERNET'/>
+	<application android:label='NSG' android:icon='@mipmap/ic_launcher'>
+		<activity android:name='de.nsg.app.MainActivity'>
+			<intent-filter>
+				<category android:name='android.intent.category.LAUNCHER'/>
+				<action android:name='android.intent.action.MAIN'/>
+			</intent-filter>
+		</activity>
+	</application>
+</manifest>
