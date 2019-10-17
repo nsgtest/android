@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<resources>
+    <dimen name='buttonsize'>
+        60dp
+    </dimen>
+    <dimen name='buttonmargin'>
+        36dp
+    </dimen>
+    <dimen name='buttonforegroundsize'>
+        36dp
+    </dimen>
+</resources>

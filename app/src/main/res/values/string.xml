@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<resources>
+    <string name='buttoncontentdescription'>
+        Button to load recently downloaded index.html.
+    </string>
+</resources>

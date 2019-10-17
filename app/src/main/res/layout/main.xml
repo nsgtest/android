@@ -1,0 +1,5 @@
+<?xml version='1.0'?>
+<RelativeLayout xmlns:android='http://schemas.android.com/apk/res/android' android:layout_width='match_parent' android:layout_height='match_parent'>
+    <de.nsg.app.extendedWebView android:id='@+id/webview' android:layout_width='match_parent' android:layout_height='match_parent'/>
+    <ImageButton android:id='@+id/button' android:layout_width='@dimen/buttonsize' android:layout_height='@dimen/buttonsize' android:layout_margin='@dimen/buttonmargin' android:layout_alignParentEnd='true' android:layout_alignParentRight='true' android:layout_alignParentBottom='true' android:src='@drawable/button_foreground' android:background='@drawable/button_background' android:contentDescription='@string/buttoncontentdescription' android:visibility='gone'/>
+</RelativeLayout>

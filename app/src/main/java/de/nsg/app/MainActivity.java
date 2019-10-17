@@ -2,6 +2,7 @@ package de.nsg.app;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.AttributeSet;
 import android.util.Base64;
 import android.view.Window;
 import android.webkit.WebView;
@@ -29,8 +30,9 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		extendedWebView webview = new extendedWebView(this);
-		setContentView(webview);
+		setContentView(R.layout.main);
+
+		extendedWebView webview = findViewById(R.id.webview);
 		WebSettings websettings = webview.getSettings();
 		websettings.setJavaScriptEnabled(true);
 		webview.setWebViewClient(new WebViewClient());
@@ -40,14 +42,7 @@ public class MainActivity extends Activity {
 		thread.start();
 
 		try {
-			extendedFile html = new extendedFile(getFilesDir(), "index.html");
-			String url = html.toURL().toString();
-
-			if (html.exists()) {
-				webview.loadUrl(url);
-			} else {
-				webview.exception();
-			}
+			webview.start(this);
 		} catch (MalformedURLException e) {
 			Log.d("NSG", "MalformedURLException", e);
 			webview.exception();
@@ -56,7 +51,7 @@ public class MainActivity extends Activity {
 }
 
 class extendedFile extends File {
-	public extendedFile(File file, String string) {
+	extendedFile(File file, String string) {
 		super(file, string);
 	}
 
@@ -65,7 +60,7 @@ class extendedFile extends File {
 		return this.toURI().toURL();
 	}
 
-	public void write(String content) throws IOException {
+	void write(String content) throws IOException {
 		FileOutputStream fileoutputstream = new FileOutputStream(this);
 		fileoutputstream.write(content.getBytes());
 		fileoutputstream.close();
@@ -73,11 +68,11 @@ class extendedFile extends File {
 }
 
 class extendedJSONObject extends JSONObject {
-	public extendedJSONObject(String json) throws JSONException {
+	extendedJSONObject(String json) throws JSONException {
 		super(json);
 	}
 
-	public void write(Context context) throws JSONException, IOException {
+	void write(Context context) throws JSONException, IOException {
 		InputStream inputstream = new URL(this.getString("Url")).openStream();
 		extendedInputStreamReader inputstreamreader = new extendedInputStreamReader(inputstream);
 		String upstream = inputstreamreader.fetch();
@@ -90,21 +85,21 @@ class extendedJSONObject extends JSONObject {
 		file.write(new String(base64));
 	}
 
-	public void delete(Context context) throws JSONException {
+	void delete(Context context) throws JSONException {
 		File file = new File(context.getFilesDir(), this.getString("Name"));
 		Boolean deleted = file.delete();
 		if (!deleted) {
-
+            Log.d("NSG", "FileNotFound");
 		}
 	}
 }
 
 class extendedInputStreamReader extends InputStreamReader {
-	public extendedInputStreamReader(InputStream inputstream) {
+	extendedInputStreamReader(InputStream inputstream) {
 		super(inputstream);
 	}
 
-	public String fetch() throws IOException{
+	String fetch() throws IOException{
 		BufferedReader bufferedreader = new BufferedReader(this);
 		StringBuilder stringbuilder = new StringBuilder();
 		String string;
@@ -124,24 +119,39 @@ class extendedWebView extends WebView {
 		super(context);
 	}
 
+	public extendedWebView(Context context, AttributeSet attributeset) {
+		super(context, attributeset);
+	}
+
 	public void exception() {
 		this.loadData("Etwas ist schief gelaufen, bitte verbinde das Gerät mit dem Internet und starte die App neu!", "text/html; charset=UTF-8", null);
+	}
+
+	public void start(Context context) throws MalformedURLException {
+		extendedFile html = new extendedFile(context.getFilesDir(), "index.html");
+		String url = html.toURL().toString();
+
+		if (html.exists()) {
+			this.loadUrl(url);
+		} else {
+			this.exception();
+		}
 	}
 }
 
 class implementedRunnable implements Runnable {
 	private Context context;
 
-	public implementedRunnable(Context context) {
+	implementedRunnable(Context context) {
 		this.context = context;
 	}
 
 	@Override
 	public void run() {
-		ConnectivityManager connectivitymanager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-		NetworkInfo networkinfo = connectivitymanager.getActiveNetworkInfo();
-
 		try {
+			ConnectivityManager connectivitymanager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+			NetworkInfo networkinfo = connectivitymanager.getActiveNetworkInfo();
+
 			if (networkinfo != null && networkinfo.isConnected()) {
 				URL upstreamurl = new URL("https://api.github.com/repos/nsgtest/refs/contents/references.json?ref=master");
 				extendedInputStreamReader upstreaminputstreamreader = new extendedInputStreamReader(upstreamurl.openStream());
@@ -168,7 +178,7 @@ class implementedRunnable implements Runnable {
 						notexist = true;
 						for (int j = 0; j < referencesarray.length(); j++) {
 							extendedJSONObject referencesobject = new extendedJSONObject(referencesarray.getString(j));
-							if (upstreamobject.getString("Name") == referencesobject.getString("Name") && upstreamobject.getJSONArray("Checksum") != referencesobject.getJSONArray("Checksum")) {
+							if (upstreamobject.getString("Name").equals(referencesobject.getString("Name")) && !upstreamobject.getString("Checksum").equals(referencesobject.getString("Checksum"))) {
 								upstreamobject.write(context);
 								notexist = false;
 								break;
@@ -186,7 +196,7 @@ class implementedRunnable implements Runnable {
 						notexist = true;
 						for (int i = 0; i < upstreamarray.length(); i++) {
 							extendedJSONObject upstreamobject = new extendedJSONObject(upstreamarray.getString(i));
-							if (referencesobject.getString("Name") == upstreamobject.getString("Name")) {
+							if (referencesobject.getString("Name").equals(upstreamobject.getString("Name"))) {
 								notexist = false;
 								break;
 							}
@@ -209,6 +219,8 @@ class implementedRunnable implements Runnable {
 			Log.d("NSG", "JSONException", e);
 		} catch (IOException e) {
 			Log.d("NSG", "IOException", e);
+		} catch (NullPointerException e) {
+			Log.d("NSG", "NullPointerException");
 		}
 	}
 }
