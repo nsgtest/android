@@ -41,29 +41,7 @@ public class MainActivity extends Activity {
 		Thread thread = new Thread(runnable);
 		thread.start();
 
-		try {
-			webview.start(this);
-		} catch (MalformedURLException e) {
-			Log.d("NSG", "MalformedURLException", e);
-			webview.exception();
-		}
-	}
-}
-
-class extendedFile extends File {
-	extendedFile(File file, String string) {
-		super(file, string);
-	}
-
-	@Override
-	public URL toURL() throws MalformedURLException {
-		return this.toURI().toURL();
-	}
-
-	void write(String content) throws IOException {
-		FileOutputStream fileoutputstream = new FileOutputStream(this);
-		fileoutputstream.write(content.getBytes());
-		fileoutputstream.close();
+		webview.start(thread, this);
 	}
 }
 
@@ -81,14 +59,15 @@ class extendedJSONObject extends JSONObject {
 
 		JSONObject response = new JSONObject(upstream);
 		byte[] base64 = Base64.decode(response.getString("content"), Base64.DEFAULT);
-		extendedFile file = new extendedFile(context.getFilesDir(), this.getString("Name"));
-		file.write(new String(base64));
+		File file = new File(context.getFilesDir(), this.getString("Name"));
+        FileOutputStream fileoutputstream = new FileOutputStream(file);
+        fileoutputstream.write(new String(base64).getBytes());
+        fileoutputstream.close();
 	}
 
 	void delete(Context context) throws JSONException {
 		File file = new File(context.getFilesDir(), this.getString("Name"));
-		Boolean deleted = file.delete();
-		if (!deleted) {
+		if (file.delete()) {
             Log.d("NSG", "FileNotFound");
 		}
 	}
@@ -127,15 +106,24 @@ class extendedWebView extends WebView {
 		this.loadData("Etwas ist schief gelaufen, bitte verbinde das Gerät mit dem Internet und starte die App neu!", "text/html; charset=UTF-8", null);
 	}
 
-	public void start(Context context) throws MalformedURLException {
-		extendedFile html = new extendedFile(context.getFilesDir(), "index.html");
-		String url = html.toURL().toString();
+	public void start(Thread thread, Context context) {
+		try {
+            File html = new File(context.getFilesDir(), "index.html");
+            String url = html.toURI().toURL().toString();
 
-		if (html.exists()) {
-			this.loadUrl(url);
-		} else {
-			this.exception();
-		}
+            if (html.exists()) {
+                this.loadUrl(url);
+            } else {
+                thread.join();
+                this.loadUrl(url);
+            }
+        } catch (MalformedURLException e) {
+            Log.d("NSG", "MalformedURLException", e);
+            this.exception();
+        } catch (InterruptedException e) {
+            Log.d("NSG", "InterruptedException", e);
+            this.exception();
+        }
 	}
 }
 
@@ -162,7 +150,7 @@ class implementedRunnable implements Runnable {
 				byte[] base64 = Base64.decode(response.getString("content"), Base64.DEFAULT);
 				JSONArray upstreamarray = new JSONArray(new String(base64));
 
-				extendedFile references = new extendedFile(context.getFilesDir(), "references.json");
+				File references = new File(context.getFilesDir(), "references.json");
 
 				if (references.exists()) {
 					FileInputStream fileinputstream = new FileInputStream(references);
@@ -171,39 +159,36 @@ class implementedRunnable implements Runnable {
                     fileinputstream.close();
                     inputstreamreader.close();
 
-					Boolean notexist;
 					for (int i = 0; i < upstreamarray.length(); i++) {
 						extendedJSONObject upstreamobject = new extendedJSONObject(upstreamarray.getString(i));
 
-						notexist = true;
 						for (int j = 0; j < referencesarray.length(); j++) {
 							extendedJSONObject referencesobject = new extendedJSONObject(referencesarray.getString(j));
-							if (upstreamobject.getString("Name").equals(referencesobject.getString("Name")) && !upstreamobject.getString("Checksum").equals(referencesobject.getString("Checksum"))) {
-								upstreamobject.write(context);
-								notexist = false;
-								break;
-							}
-						}
+							if (upstreamobject.getString("Name").equals(referencesobject.getString("Name"))) {
+								if (upstreamobject.getString("Checksum").equals(referencesobject.getString("Checksum"))) {
+								    break;
+                                } else {
+                                    upstreamobject.write(context);
+                                    break;
+                                }
 
-						if (notexist) {
-							upstreamobject.write(context);
+							} else if (j == referencesarray.length() - 1) {
+                                upstreamobject.write(context);
+                                break;
+                            }
 						}
 					}
 
 					for (int j = 0; j < referencesarray.length(); j++) {
 						extendedJSONObject referencesobject = new extendedJSONObject(referencesarray.getString(j));
 
-						notexist = true;
 						for (int i = 0; i < upstreamarray.length(); i++) {
 							extendedJSONObject upstreamobject = new extendedJSONObject(upstreamarray.getString(i));
 							if (referencesobject.getString("Name").equals(upstreamobject.getString("Name"))) {
-								notexist = false;
 								break;
-							}
-						}
-
-						if (notexist) {
-							referencesobject.delete(context);
+							} else if (i == upstreamarray.length() - 1) {
+                                referencesobject.delete(context);
+                            }
 						}
 					}
 				} else {
@@ -213,14 +198,14 @@ class implementedRunnable implements Runnable {
 					}
 				}
 
-				references.write(new String(base64));
+                FileOutputStream fileoutputstream = new FileOutputStream(references);
+                fileoutputstream.write(new String(base64).getBytes());
+                fileoutputstream.close();
 			}
 		} catch (JSONException e) {
 			Log.d("NSG", "JSONException", e);
 		} catch (IOException e) {
 			Log.d("NSG", "IOException", e);
-		} catch (NullPointerException e) {
-			Log.d("NSG", "NullPointerException");
 		}
 	}
 }
