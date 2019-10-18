@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.util.AttributeSet;
 import android.util.Base64;
+import android.view.View;
 import android.view.Window;
 import android.webkit.WebView;
 import android.webkit.WebSettings;
@@ -24,6 +25,7 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import android.util.Log;
+import android.widget.ImageButton;
 
 public class MainActivity extends Activity {
 	@Override
@@ -32,16 +34,29 @@ public class MainActivity extends Activity {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.main);
 
-		extendedWebView webview = findViewById(R.id.webview);
+		final extendedWebView webview = findViewById(R.id.webview);
 		WebSettings websettings = webview.getSettings();
 		websettings.setJavaScriptEnabled(true);
 		webview.setWebViewClient(new WebViewClient());
 
 		implementedRunnable runnable = new implementedRunnable(this);
-		Thread thread = new Thread(runnable);
+		final Thread thread = new Thread(runnable);
 		thread.start();
 
 		webview.start(thread, this);
+
+		if (runnable.button) {
+			final ImageButton imagebutton = findViewById(R.id.button);
+			imagebutton.setVisibility(View.VISIBLE);
+			imagebutton.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					imagebutton.setVisibility(View.VISIBLE);
+
+					webview.start(thread, MainActivity.this);
+				}
+			});
+		}
 	}
 }
 
@@ -113,6 +128,7 @@ class extendedWebView extends WebView {
 
             if (html.exists()) {
                 this.loadUrl(url);
+                thread.join();
             } else {
                 thread.join();
                 this.loadUrl(url);
@@ -129,6 +145,7 @@ class extendedWebView extends WebView {
 
 class implementedRunnable implements Runnable {
 	private Context context;
+	Boolean button;
 
 	implementedRunnable(Context context) {
 		this.context = context;
@@ -152,6 +169,7 @@ class implementedRunnable implements Runnable {
 
 				File references = new File(context.getFilesDir(), "references.json");
 
+				this.button = false;
 				if (references.exists()) {
 					FileInputStream fileinputstream = new FileInputStream(references);
 					extendedInputStreamReader inputstreamreader= new extendedInputStreamReader(fileinputstream);
@@ -169,6 +187,10 @@ class implementedRunnable implements Runnable {
 								    break;
                                 } else {
                                     upstreamobject.write(context);
+
+                                    if (upstreamobject.getString("Name").equals("index.html")) {
+                                    	this.button = true;
+									}
                                     break;
                                 }
 
