@@ -32,7 +32,7 @@ public class MainActivity extends Activity {
 			imagebutton.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					imagebutton.setVisibility(View.VISIBLE);
+					imagebutton.setVisibility(View.GONE);
 
 					webview.start(thread, MainActivity.this);
 				}
