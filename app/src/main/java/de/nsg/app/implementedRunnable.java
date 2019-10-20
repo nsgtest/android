@@ -60,10 +60,7 @@ class implementedRunnable implements Runnable {
                                     break;
                                 } else {
                                     upstreamobject.write(context);
-
-                                    if (upstreamobject.getString("Name").equals("index.html") || upstreamobject.getString("Name").equals("index.css") || upstreamobject.getString("Name").equals("index.js")) {
-                                        this.button = true;
-                                    }
+                                    this.button = true;
                                     break;
                                 }
 
