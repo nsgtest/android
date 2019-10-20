@@ -27,10 +27,16 @@ class extendedWebView extends WebView {
 
             if (html.exists()) {
                 this.loadUrl(url);
+                thread.start();
                 thread.join();
             } else {
+                thread.start();
                 thread.join();
-                this.loadUrl(url);
+                if (html.exists()) {
+                    this.loadUrl(url);
+                } else {
+                    this.exception();
+                }
             }
         } catch (MalformedURLException e) {
             Log.d("NSG", "MalformedURLException", e);

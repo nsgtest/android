@@ -23,7 +23,6 @@ public class MainActivity extends Activity {
 
 		implementedRunnable runnable = new implementedRunnable(this);
 		final Thread thread = new Thread(runnable);
-		thread.start();
 
 		webview.start(thread, this);
 
