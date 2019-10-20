@@ -24,6 +24,8 @@ class implementedRunnable implements Runnable {
 
     @Override
     public void run() {
+        this.button = false;
+
         try {
             ConnectivityManager connectivitymanager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo networkinfo = connectivitymanager.getActiveNetworkInfo();
@@ -59,7 +61,7 @@ class implementedRunnable implements Runnable {
                                 } else {
                                     upstreamobject.write(context);
 
-                                    if (upstreamobject.getString("Name").equals("index.html")) {
+                                    if (upstreamobject.getString("Name").equals("index.html") || upstreamobject.getString("Name").equals("index.css") || upstreamobject.getString("Name").equals("index.js")) {
                                         this.button = true;
                                     }
                                     break;

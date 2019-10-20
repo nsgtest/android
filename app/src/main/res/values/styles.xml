@@ -1,0 +1,6 @@
+<?xml version='1.0'?>
+<resources>
+    <style name='Launcher' parent="Theme.AppCompat">
+        <item name='android:windowBackground'>@drawable/launch_screen</item>
+    </style>
+</resources>

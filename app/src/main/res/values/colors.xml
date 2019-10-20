@@ -1,4 +1,5 @@
 <?xml version='1.0'?>
 <resources>
 	<color name='nsg'>#00a3da</color>
+	<color name='background'>#ffffff</color>
 </resources>

@@ -2,11 +2,17 @@
 <manifest xmlns:android='http://schemas.android.com/apk/res/android' package='de.nsg.app'>
 	<uses-permission android:name='android.permission.ACCESS_NETWORK_STATE'/>
 	<uses-permission android:name='android.permission.INTERNET'/>
-	<application android:label='NSG' android:icon='@mipmap/ic_launcher'>
-		<activity android:name='de.nsg.app.MainActivity'>
+	<application android:label='NSG' android:icon='@mipmap/ic_launcher' android:allowBackup='false' android:theme="@style/Launcher">
+		<activity android:name='de.nsg.app.MainActivity' android:configChanges='orientation' android:screenOrientation='portrait'>
 			<intent-filter>
 				<category android:name='android.intent.category.LAUNCHER'/>
 				<action android:name='android.intent.action.MAIN'/>
+			</intent-filter>
+			<intent-filter>
+				<data android:scheme='https' android:host='www.nellysachs.de' android:pathPrefix='/app'/>
+				<category android:name='android.intent.category.BROWSABLE'/>
+				<category android:name='android.intent.category.DEFAULT'/>
+				<action android:name='android.intent.action.VIEW'/>
 			</intent-filter>
 		</activity>
 	</application>
