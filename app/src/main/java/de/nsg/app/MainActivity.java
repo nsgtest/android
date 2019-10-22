@@ -19,6 +19,7 @@ public class MainActivity extends Activity {
 		final extendedWebView webview = findViewById(R.id.webview);
 		WebSettings websettings = webview.getSettings();
 		websettings.setJavaScriptEnabled(true);
+		websettings.setDomStorageEnabled(true);
 		webview.setWebViewClient(new WebViewClient());
 
 		implementedRunnable runnable = new implementedRunnable(this);
