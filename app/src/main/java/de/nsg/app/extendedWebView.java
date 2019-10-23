@@ -27,11 +27,17 @@ class extendedWebView extends WebView {
 
             if (html.exists()) {
                 this.loadUrl(url);
-                thread.start();
-                thread.join();
+
+                if (thread != null) {
+                    thread.start();
+                    thread.join();
+                }
             } else {
-                thread.start();
-                thread.join();
+                if (thread != null) {
+                    thread.start();
+                    thread.join();
+                }
+
                 if (html.exists()) {
                     this.loadUrl(url);
                 } else {

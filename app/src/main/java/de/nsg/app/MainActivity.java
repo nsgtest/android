@@ -23,7 +23,7 @@ public class MainActivity extends Activity {
 		webview.setWebViewClient(new WebViewClient());
 
 		implementedRunnable runnable = new implementedRunnable(this);
-		final Thread thread = new Thread(runnable);
+		Thread thread = new Thread(runnable);
 
 		webview.start(thread, this);
 
@@ -35,7 +35,7 @@ public class MainActivity extends Activity {
 				public void onClick(View v) {
 					imagebutton.setVisibility(View.GONE);
 
-					webview.start(thread, MainActivity.this);
+					webview.start(null, MainActivity.this);
 				}
 			});
 		}
