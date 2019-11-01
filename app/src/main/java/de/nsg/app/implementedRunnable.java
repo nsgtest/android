@@ -31,7 +31,7 @@ class implementedRunnable implements Runnable {
             NetworkInfo networkinfo = connectivitymanager.getActiveNetworkInfo();
 
             if (networkinfo != null && networkinfo.isConnected()) {
-                URL upstreamurl = new URL("https://api.github.com/repos/nsgtest/www/contents/references.json?ref=master");
+                URL upstreamurl = new URL("https://api.github.com/repos/nsgtest/references/contents/references.json?ref=master");
                 extendedInputStreamReader upstreaminputstreamreader = new extendedInputStreamReader(upstreamurl.openStream());
                 String upstream = upstreaminputstreamreader.fetch();
                 upstreaminputstreamreader.close();
