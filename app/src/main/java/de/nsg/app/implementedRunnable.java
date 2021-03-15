@@ -3,7 +3,6 @@ package de.nsg.app;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.util.Base64;
 import android.util.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -24,37 +23,31 @@ class implementedRunnable implements Runnable {
 
     @Override
     public void run() {
-        this.button = false;
-
         try {
+            this.button = false;
+
             ConnectivityManager connectivitymanager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo networkinfo = connectivitymanager.getActiveNetworkInfo();
 
             if (networkinfo != null && networkinfo.isConnected()) {
-                URL upstreamurl = new URL("https://api.github.com/repos/nsgtest/references/contents/references.json?ref=master");
+                URL upstreamurl = new URL("https://raw.githubusercontent.com/nsgtest/references/master/references.json");
                 extendedInputStreamReader upstreaminputstreamreader = new extendedInputStreamReader(upstreamurl.openStream());
-                String upstream = upstreaminputstreamreader.fetch();
+                JSONArray upstream = new JSONArray(upstreaminputstreamreader.fetch());
                 upstreaminputstreamreader.close();
 
-                JSONObject response = new JSONObject(upstream);
-                byte[] base64 = Base64.decode(response.getString("content"), Base64.DEFAULT);
-                JSONArray upstreamarray = new JSONArray(new String(base64));
-
-                File references = new File(context.getFilesDir(), "references.json");
-
-                this.button = false;
-                if (references.exists()) {
-                    FileInputStream fileinputstream = new FileInputStream(references);
+                File referencesfile = new File(context.getFilesDir(), "references.json");
+                if (referencesfile.exists()) {
+                    FileInputStream fileinputstream = new FileInputStream(referencesfile);
                     extendedInputStreamReader inputstreamreader= new extendedInputStreamReader(fileinputstream);
-                    JSONArray referencesarray = new JSONArray(inputstreamreader.fetch());
+                    JSONArray references = new JSONArray(inputstreamreader.fetch());
                     fileinputstream.close();
                     inputstreamreader.close();
 
-                    for (int i = 0; i < upstreamarray.length(); i++) {
-                        extendedJSONObject upstreamobject = new extendedJSONObject(upstreamarray.getString(i));
+                    for (int i = 0; i < upstream.length(); i++) {
+                        extendedJSONObject upstreamobject = new extendedJSONObject(upstream.getString(i));
 
-                        for (int j = 0; j < referencesarray.length(); j++) {
-                            extendedJSONObject referencesobject = new extendedJSONObject(referencesarray.getString(j));
+                        for (int j = 0; j < references.length(); j++) {
+                            extendedJSONObject referencesobject = new extendedJSONObject(references.getString(j));
                             if (upstreamobject.getString("Name").equals(referencesobject.getString("Name"))) {
                                 if (upstreamobject.getString("Checksum").equals(referencesobject.getString("Checksum"))) {
                                     break;
@@ -64,34 +57,34 @@ class implementedRunnable implements Runnable {
                                     break;
                                 }
 
-                            } else if (j == referencesarray.length() - 1) {
+                            } else if (j == references.length() - 1) {
                                 upstreamobject.write(context);
                                 break;
                             }
                         }
                     }
 
-                    for (int j = 0; j < referencesarray.length(); j++) {
-                        extendedJSONObject referencesobject = new extendedJSONObject(referencesarray.getString(j));
+                    for (int j = 0; j < references.length(); j++) {
+                        extendedJSONObject referencesobject = new extendedJSONObject(references.getString(j));
 
-                        for (int i = 0; i < upstreamarray.length(); i++) {
-                            extendedJSONObject upstreamobject = new extendedJSONObject(upstreamarray.getString(i));
+                        for (int i = 0; i < upstream.length(); i++) {
+                            extendedJSONObject upstreamobject = new extendedJSONObject(upstream.getString(i));
                             if (referencesobject.getString("Name").equals(upstreamobject.getString("Name"))) {
                                 break;
-                            } else if (i == upstreamarray.length() - 1) {
+                            } else if (i == upstream.length() - 1) {
                                 referencesobject.delete(context);
                             }
                         }
                     }
                 } else {
-                    for (int i = 0; i < upstreamarray.length(); i++) {
-                        extendedJSONObject object = new extendedJSONObject(upstreamarray.getString(i));
+                    for (int i = 0; i < upstream.length(); i++) {
+                        extendedJSONObject object = new extendedJSONObject(upstream.getString(i));
                         object.write(context);
                     }
                 }
 
-                FileOutputStream fileoutputstream = new FileOutputStream(references);
-                fileoutputstream.write(new String(base64).getBytes());
+                FileOutputStream fileoutputstream = new FileOutputStream(referencesfile);
+                fileoutputstream.write(upstream.toString().getBytes());
                 fileoutputstream.close();
             }
         } catch (JSONException e) {
