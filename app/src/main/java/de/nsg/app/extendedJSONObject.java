@@ -1,7 +1,6 @@
 package de.nsg.app;
 
 import android.content.Context;
-import android.util.Base64;
 import android.util.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -23,11 +22,9 @@ class extendedJSONObject extends JSONObject {
         inputstream.close();
         inputstreamreader.close();
 
-        JSONObject response = new JSONObject(upstream);
-        byte[] base64 = Base64.decode(response.getString("content"), Base64.DEFAULT);
         File file = new File(context.getFilesDir(), this.getString("Name"));
         FileOutputStream fileoutputstream = new FileOutputStream(file);
-        fileoutputstream.write(new String(base64).getBytes());
+        fileoutputstream.write(upstream.getBytes());
         fileoutputstream.close();
     }
 
